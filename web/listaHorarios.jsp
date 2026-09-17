@@ -4,74 +4,1460 @@
 <%@page import="modelo.Horario"%>
 <%@page import="modelo.HorarioDAO"%>
 <%@page import="java.util.List"%>
+
 <%
     Usuario actual = (Usuario) session.getAttribute("usuarioLogueado");
-    if (actual == null) { response.sendRedirect("index.jsp"); return; }
-    if (actual.getIdperfil() != 1) { response.sendRedirect("front.jsp"); return; }
+
+    if (actual == null) {
+        response.sendRedirect("index.jsp");
+        return;
+    }
+
+    if (actual.getIdperfil() != 1) {
+        response.sendRedirect("front.jsp");
+        return;
+    }
 
     UsuarioDAO udao = new UsuarioDAO();
     HorarioDAO hdao = new HorarioDAO();
+
     List<Usuario> doctores = udao.listarDoctores();
     List<Horario> horarios = hdao.listarTodos();
+
     String ok = request.getParameter("ok");
     String error = request.getParameter("error");
+
+    String[] dias = {
+        "Lunes",
+        "Martes",
+        "Miércoles",
+        "Jueves",
+        "Viernes",
+        "Sábado",
+        "Domingo"
+    };
 %>
+
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Horarios de neurólogos | NeuroCitas</title>
-<style>
-*{box-sizing:border-box} body{margin:0;font-family:Inter,Segoe UI,Arial,sans-serif;background:linear-gradient(135deg,#eef6fc 0%,#f8fbff 55%,#eaf3fb 100%);color:#10233f;min-height:100vh}.wrap{padding:24px;max-width:1500px;margin:auto}.hero{position:relative;overflow:hidden;border-radius:24px;padding:30px 34px;color:#fff;background:linear-gradient(120deg,#071b3a,#0b315f 58%,#075d8c);box-shadow:0 18px 45px rgba(10,42,78,.18);animation:rise .55s ease}.hero:before,.hero:after{content:"";position:absolute;border-radius:50%;border:1px solid rgba(95,211,255,.25)}.hero:before{width:260px;height:260px;right:45px;top:-110px}.hero:after{width:170px;height:170px;right:90px;top:-65px}.brain{position:absolute;right:38px;top:16px;font-size:92px;opacity:.22;filter:drop-shadow(0 0 18px #44c6ff);animation:pulse 3s ease-in-out infinite}.eyebrow{font-size:12px;letter-spacing:2.2px;color:#6fd5ff;font-weight:800}.hero h1{font-size:36px;margin:10px 0 8px}.hero p{margin:0;color:#c6ddf2;max-width:680px;line-height:1.6}.grid{display:grid;grid-template-columns:minmax(0,1fr) 270px;gap:18px;margin-top:18px}.card{background:rgba(255,255,255,.92);border:1px solid rgba(151,184,214,.28);border-radius:20px;padding:22px;box-shadow:0 12px 35px rgba(18,56,91,.08);animation:rise .65s ease}.card-head{display:flex;align-items:center;gap:13px;margin-bottom:18px}.icon{width:48px;height:48px;border-radius:14px;background:#e9f4ff;display:grid;place-items:center;font-size:24px}.card h2{margin:0;font-size:21px}.sub{color:#7188a5;font-size:13px;margin-top:4px}.form-grid{display:grid;grid-template-columns:1.35fr 1fr .8fr .8fr auto;gap:12px;align-items:end}.field label{display:block;font-size:12px;font-weight:800;margin:0 0 7px}.field select,.field input,.search{width:100%;height:46px;border:1px solid #cfdeec;border-radius:12px;background:#fbfdff;padding:0 13px;color:#18304f;outline:none;transition:.2s}.field select:focus,.field input:focus,.search:focus{border-color:#2087e8;box-shadow:0 0 0 4px rgba(32,135,232,.1)}.btn{height:46px;border:0;border-radius:12px;padding:0 18px;font-weight:800;cursor:pointer;transition:.2s}.primary{background:linear-gradient(135deg,#0875df,#159ee9);color:white;box-shadow:0 8px 18px rgba(8,117,223,.22)}.btn:hover{transform:translateY(-2px)}.alert{padding:12px 15px;border-radius:12px;margin-bottom:15px;font-weight:700;font-size:13px;animation:pop .35s ease}.success{background:#e9fbf1;color:#11773d}.error{background:#fff0f0;color:#b62c2c}.table-card{margin-top:18px}.toolbar{display:flex;justify-content:space-between;gap:15px;align-items:center}.toolbar .search{max-width:310px}.table-wrap{overflow:auto;border-radius:14px;border:1px solid #e1ebf4}.table{width:100%;border-collapse:collapse;background:white}.table th{background:#173b60;color:#fff;text-align:left;padding:13px;font-size:12px}.table td{padding:13px;border-bottom:1px solid #edf2f7;font-size:13px}.table tbody tr{transition:.2s}.table tbody tr:hover{background:#f3f9ff;transform:scale(1.002)}.doctor{font-weight:800}.muted{display:block;color:#7c91aa;font-size:11px;margin-top:3px}.badge{display:inline-flex;align-items:center;gap:7px;background:#ddf8e8;color:#138343;padding:6px 10px;border-radius:99px;font-weight:800;font-size:11px}.dot{width:7px;height:7px;border-radius:50%;background:#1bb95b}.danger{height:34px;background:#ffe7e7;color:#c62c2c;padding:0 11px}.stats{display:grid;gap:14px}.stat{background:#fff;border:1px solid #dfeaf4;border-radius:18px;padding:20px;box-shadow:0 10px 28px rgba(18,56,91,.06)}.stat .num{font-size:30px;font-weight:900;color:#0a5ea8}.stat small{color:#7890aa}.neuro-art{min-height:180px;color:#fff;background:linear-gradient(145deg,#0a2848,#0c5b86);position:relative;overflow:hidden}.neuro-art .bigbrain{font-size:90px;position:absolute;right:12px;bottom:2px;opacity:.3;animation:pulse 3s infinite}.neuro-art p{position:relative;z-index:2;font-weight:700;line-height:1.5;max-width:155px}.empty{text-align:center!important;color:#7990a8;padding:28px!important}@keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}@keyframes pop{from{transform:scale(.97);opacity:0}to{transform:scale(1);opacity:1}}@keyframes pulse{50%{transform:scale(1.07);filter:drop-shadow(0 0 24px #44c6ff)}}@media(max-width:1050px){.grid{grid-template-columns:1fr}.stats{grid-template-columns:repeat(3,1fr)}.form-grid{grid-template-columns:1fr 1fr}.brain{display:none}}@media(max-width:650px){.wrap{padding:12px}.hero h1{font-size:27px}.form-grid,.stats{grid-template-columns:1fr}.toolbar{align-items:stretch;flex-direction:column}.toolbar .search{max-width:none}}
-</style>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Calendario de neurólogos | NeuroCitas</title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: "Segoe UI", Arial, sans-serif;
+            background: #f3f7fb;
+            color: #10233f;
+        }
+
+        .wrap {
+            padding: 24px;
+            max-width: 1600px;
+            margin: auto;
+        }
+
+        /* ============================= */
+        /* ENCABEZADO */
+        /* ============================= */
+
+        .hero {
+            position: relative;
+            overflow: hidden;
+            border-radius: 22px;
+            padding: 28px 32px;
+            color: white;
+
+            background:
+                linear-gradient(
+                    120deg,
+                    #071b3a,
+                    #0b315f 58%,
+                    #075d8c
+                );
+
+            box-shadow:
+                0 18px 45px rgba(10,42,78,.18);
+
+            animation: entrada .5s ease;
+        }
+
+        .hero h1 {
+            font-size: 34px;
+            margin: 8px 0 7px;
+        }
+
+        .hero p {
+            margin: 0;
+            color: #c6ddf2;
+        }
+
+        .eyebrow {
+            color: #65d3ff;
+            letter-spacing: 2px;
+            font-size: 12px;
+            font-weight: 800;
+        }
+
+        .brain {
+            position: absolute;
+            right: 40px;
+            top: 10px;
+            font-size: 100px;
+            opacity: .18;
+            animation: pulso 3s infinite;
+        }
+
+        /* ============================= */
+        /* TARJETAS */
+        /* ============================= */
+
+        .card {
+            background: white;
+            margin-top: 20px;
+            padding: 22px;
+            border-radius: 20px;
+            border: 1px solid #dce8f3;
+
+            box-shadow:
+                0 10px 30px rgba(20,55,90,.07);
+
+            animation: entrada .6s ease;
+        }
+
+        .card-title {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .title-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 14px;
+            display: grid;
+            place-items: center;
+            background: #e8f4ff;
+            font-size: 24px;
+        }
+
+        .card h2 {
+            margin: 0;
+            font-size: 21px;
+        }
+
+        .sub {
+            color: #7188a5;
+            font-size: 13px;
+            margin-top: 4px;
+        }
+
+        /* ============================= */
+        /* ALERTAS */
+        /* ============================= */
+
+        .alert {
+            padding: 12px 15px;
+            border-radius: 12px;
+            margin-bottom: 15px;
+            font-weight: 700;
+            font-size: 13px;
+        }
+
+        .success {
+            background: #e7faef;
+            color: #13763e;
+        }
+
+        .error {
+            background: #fff0f0;
+            color: #b72d2d;
+        }
+
+        /* ============================= */
+        /* FORMULARIO */
+        /* ============================= */
+
+        .form-grid {
+            display: grid;
+            grid-template-columns:
+                1.4fr
+                1fr
+                .8fr
+                .8fr
+                auto;
+
+            gap: 12px;
+            align-items: end;
+        }
+
+        .field label {
+            display: block;
+            font-size: 12px;
+            font-weight: 800;
+            margin-bottom: 7px;
+        }
+
+        .field select,
+        .field input,
+        .filter-select {
+            width: 100%;
+            height: 45px;
+            border: 1px solid #cbdbe9;
+            border-radius: 11px;
+            background: #fbfdff;
+            padding: 0 12px;
+            color: #17304d;
+            outline: none;
+            transition: .2s;
+        }
+
+        .field select:focus,
+        .field input:focus,
+        .filter-select:focus {
+            border-color: #1687e7;
+
+            box-shadow:
+                0 0 0 4px rgba(22,135,231,.1);
+        }
+
+        /* ============================= */
+        /* BOTONES */
+        /* ============================= */
+
+        .btn {
+            height: 45px;
+            border: 0;
+            border-radius: 11px;
+            padding: 0 18px;
+            font-weight: 800;
+            cursor: pointer;
+            transition: .2s;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .primary {
+            background:
+                linear-gradient(
+                    135deg,
+                    #0875df,
+                    #159ee9
+                );
+
+            color: white;
+
+            box-shadow:
+                0 8px 18px rgba(8,117,223,.22);
+        }
+
+        /* ============================= */
+        /* FILTRO */
+        /* ============================= */
+
+        .calendar-tools {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .filter-select {
+            width: 250px;
+        }
+
+        /* ============================= */
+        /* CALENDARIO */
+        /* ============================= */
+
+        .calendar-scroll {
+            overflow-x: auto;
+            border-radius: 16px;
+            border: 1px solid #dce7f1;
+        }
+
+        .calendar {
+            width: 100%;
+            min-width: 1150px;
+            border-collapse: collapse;
+            table-layout: fixed;
+            background: white;
+        }
+
+        .calendar thead th {
+            background: #12385d;
+            color: white;
+            padding: 15px 8px;
+            font-size: 13px;
+
+            border-right:
+                1px solid rgba(255,255,255,.12);
+        }
+
+        .calendar thead th:first-child {
+            width: 80px;
+            background: #0b2948;
+        }
+
+        .calendar td {
+            border-right: 1px solid #e2eaf2;
+            border-bottom: 1px solid #e2eaf2;
+            vertical-align: top;
+            height: 95px;
+            padding: 8px;
+            background: #fbfdff;
+            transition: .2s;
+        }
+
+        .calendar td:hover {
+            background: #f2f8fe;
+        }
+
+        .day-title {
+            font-weight: 800;
+        }
+
+        .day-small {
+            display: block;
+            font-size: 10px;
+            color: #a9c5df;
+            margin-top: 3px;
+        }
+
+        .hour {
+            background: #f0f6fb !important;
+            text-align: center;
+            font-size: 12px;
+            font-weight: 800;
+            color: #54708c;
+            vertical-align: middle !important;
+        }
+
+        /* ============================= */
+        /* HORARIO */
+        /* ============================= */
+
+        .schedule {
+            position: relative;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #e3f2ff,
+                    #edf8ff
+                );
+
+            border-left: 4px solid #1385e4;
+            border-radius: 11px;
+            padding: 9px;
+            margin-bottom: 6px;
+            cursor: pointer;
+
+            box-shadow:
+                0 5px 14px rgba(25,105,175,.10);
+
+            transition: .2s;
+
+            animation:
+                aparecer .35s ease;
+        }
+
+        .schedule:hover {
+            transform:
+                translateY(-3px)
+                scale(1.02);
+
+            box-shadow:
+                0 9px 20px rgba(25,105,175,.20);
+        }
+
+        .schedule-name {
+            font-weight: 900;
+            font-size: 12px;
+            color: #0a4e8d;
+        }
+
+        .schedule-specialty {
+            font-size: 10px;
+            color: #6d8299;
+            margin-top: 3px;
+        }
+
+        .schedule-time {
+            display: inline-block;
+            margin-top: 6px;
+            background: white;
+            color: #164b78;
+            padding: 4px 7px;
+            border-radius: 7px;
+            font-size: 10px;
+            font-weight: 800;
+        }
+
+        /* ============================= */
+        /* LEYENDA */
+        /* ============================= */
+
+        .legend {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 15px;
+            color: #6d8298;
+            font-size: 12px;
+        }
+
+        .legend-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #1687e7;
+        }
+
+        /* ============================= */
+        /* MODAL */
+        /* ============================= */
+
+        .modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(4,18,35,.55);
+            backdrop-filter: blur(4px);
+
+            display: none;
+            align-items: center;
+            justify-content: center;
+
+            padding: 20px;
+            z-index: 9999;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-box {
+            width: 100%;
+            max-width: 430px;
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+
+            box-shadow:
+                0 25px 70px rgba(0,0,0,.25);
+
+            animation:
+                modalEntrada .25s ease;
+        }
+
+        .modal-head {
+            padding: 22px;
+            color: white;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #08294c,
+                    #0871b6
+                );
+
+            position: relative;
+        }
+
+        .modal-head h2 {
+            margin: 0 0 5px;
+        }
+
+        .modal-head p {
+            margin: 0;
+            color: #cde6fa;
+            font-size: 13px;
+        }
+
+        .close {
+            position: absolute;
+            right: 17px;
+            top: 15px;
+
+            width: 35px;
+            height: 35px;
+
+            border: 0;
+            border-radius: 50%;
+
+            background:
+                rgba(255,255,255,.15);
+
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+        }
+
+        .modal-body {
+            padding: 22px;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 20px;
+
+            padding: 12px 0;
+
+            border-bottom:
+                1px solid #edf2f7;
+
+            font-size: 13px;
+        }
+
+        .info-row span {
+            color: #71859b;
+        }
+
+        .info-row strong {
+            text-align: right;
+            color: #173653;
+        }
+
+        .delete-form {
+            margin-top: 20px;
+        }
+
+        .delete {
+            width: 100%;
+            background: #ffe7e7;
+            color: #bf2929;
+        }
+
+        /* ============================= */
+        /* ANIMACIONES */
+        /* ============================= */
+
+        @keyframes entrada {
+
+            from {
+                opacity: 0;
+                transform: translateY(12px);
+            }
+
+            to {
+                opacity: 1;
+                transform: none;
+            }
+        }
+
+        @keyframes aparecer {
+
+            from {
+                opacity: 0;
+                transform: scale(.94);
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        @keyframes modalEntrada {
+
+            from {
+                opacity: 0;
+                transform: scale(.92);
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        @keyframes pulso {
+
+            50% {
+                transform: scale(1.08);
+            }
+        }
+
+        /* ============================= */
+        /* RESPONSIVE */
+        /* ============================= */
+
+        @media(max-width:1000px) {
+
+            .form-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .card-title {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+        }
+
+        @media(max-width:600px) {
+
+            .wrap {
+                padding: 12px;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .hero h1 {
+                font-size: 27px;
+            }
+
+            .brain {
+                display: none;
+            }
+        }
+
+    </style>
+
 </head>
+
 <body>
+
+
 <div class="wrap">
-  <section class="hero">
-    <div class="eyebrow">GESTIÓN DE HORARIOS</div>
-    <h1>Horarios de neurólogos</h1>
-    <p>Organiza la disponibilidad de los especialistas y facilita el acceso de los pacientes a la atención neurológica.</p>
-    <div class="brain">🧠</div>
-  </section>
 
-  <div class="grid">
-    <main>
-      <section class="card">
-        <div class="card-head"><div class="icon">🗓️</div><div><h2>Agregar nuevo horario</h2><div class="sub">Registra la disponibilidad de un neurólogo.</div></div></div>
-        <% if ("agregado".equals(ok)) { %><div class="alert success">✓ Horario agregado correctamente.</div><% } %>
-        <% if ("eliminado".equals(ok)) { %><div class="alert success">✓ Horario eliminado correctamente.</div><% } %>
-        <% if (error != null) { %><div class="alert error">⚠ <%= "cruce".equals(error) ? "Ese neurólogo ya tiene un horario en ese rango." : "hora".equals(error) ? "La hora de inicio debe ser menor que la hora final." : "campos".equals(error) ? "Completa todos los campos." : "No fue posible realizar la operación." %></div><% } %>
-        <form action="CtrolHorario" method="post">
-          <input type="hidden" name="accion" value="agregar">
-          <div class="form-grid">
-            <div class="field"><label>Neurólogo</label><select name="idDoctor" required><option value="">Seleccione un neurólogo</option><% for(Usuario d: doctores){ %><option value="<%=d.getIdentificacion()%>"><%=d.getNombre()%> <%=d.getApellido()%></option><% } %></select></div>
-            <div class="field"><label>Día de la semana</label><select name="diaSemana" required><option value="">Seleccione un día</option><option>Lunes</option><option>Martes</option><option>Miércoles</option><option>Jueves</option><option>Viernes</option><option>Sábado</option><option>Domingo</option></select></div>
-            <div class="field"><label>Hora de inicio</label><input type="time" name="horaInicio" required></div>
-            <div class="field"><label>Hora de fin</label><input type="time" name="horaFin" required></div>
-            <button class="btn primary" type="submit">＋ Agregar</button>
-          </div>
+
+    <!-- ============================== -->
+    <!-- ENCABEZADO -->
+    <!-- ============================== -->
+
+    <section class="hero">
+
+        <div class="eyebrow">
+            NEUROCITAS · ADMINISTRACIÓN
+        </div>
+
+        <h1>
+            📅 Calendario de neurólogos
+        </h1>
+
+        <p>
+            Consulta y administra la disponibilidad semanal
+            del equipo de neurología.
+        </p>
+
+        <div class="brain">
+            🧠
+        </div>
+
+    </section>
+
+
+    <!-- ============================== -->
+    <!-- AGREGAR HORARIO -->
+    <!-- ============================== -->
+
+    <section class="card">
+
+
+        <div class="card-title">
+
+            <div class="title-left">
+
+                <div class="icon">
+                    ➕
+                </div>
+
+                <div>
+
+                    <h2>
+                        Agregar horario
+                    </h2>
+
+                    <div class="sub">
+                        Registra la disponibilidad de un neurólogo.
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <% if ("agregado".equals(ok)) { %>
+
+            <div class="alert success">
+                ✓ Horario agregado correctamente.
+            </div>
+
+        <% } %>
+
+
+        <% if ("eliminado".equals(ok)) { %>
+
+            <div class="alert success">
+                ✓ Horario eliminado correctamente.
+            </div>
+
+        <% } %>
+
+
+        <% if (error != null) { %>
+
+            <div class="alert error">
+
+                ⚠
+
+                <%= "cruce".equals(error)
+                        ? "Ese neurólogo ya tiene un horario en ese rango."
+                        : "hora".equals(error)
+                        ? "La hora de inicio debe ser menor que la hora final."
+                        : "campos".equals(error)
+                        ? "Completa todos los campos."
+                        : "No fue posible realizar la operación."
+                %>
+
+            </div>
+
+        <% } %>
+
+
+        <form action="CtrolHorario"
+              method="post">
+
+
+            <input
+                type="hidden"
+                name="accion"
+                value="agregar"
+            >
+
+
+            <div class="form-grid">
+
+
+                <div class="field">
+
+                    <label>
+                        Neurólogo
+                    </label>
+
+                    <select
+                        name="idDoctor"
+                        required
+                    >
+
+                        <option value="">
+                            Seleccione un neurólogo
+                        </option>
+
+
+                        <% for (Usuario d : doctores) { %>
+
+                            <option value="<%= d.getIdentificacion() %>">
+
+                                Dr(a).
+                                <%= d.getNombre() %>
+                                <%= d.getApellido() %>
+
+                            </option>
+
+                        <% } %>
+
+                    </select>
+
+                </div>
+
+
+                <div class="field">
+
+                    <label>
+                        Día
+                    </label>
+
+                    <select
+                        name="diaSemana"
+                        required
+                    >
+
+                        <option value="">
+                            Seleccione un día
+                        </option>
+
+                        <option>Lunes</option>
+                        <option>Martes</option>
+                        <option>Miércoles</option>
+                        <option>Jueves</option>
+                        <option>Viernes</option>
+                        <option>Sábado</option>
+                        <option>Domingo</option>
+
+                    </select>
+
+                </div>
+
+
+                <div class="field">
+
+                    <label>
+                        Hora inicio
+                    </label>
+
+                    <input
+                        type="time"
+                        name="horaInicio"
+                        required
+                    >
+
+                </div>
+
+
+                <div class="field">
+
+                    <label>
+                        Hora fin
+                    </label>
+
+                    <input
+                        type="time"
+                        name="horaFin"
+                        required
+                    >
+
+                </div>
+
+
+                <button
+                    class="btn primary"
+                    type="submit"
+                >
+
+                    ＋ Agregar
+
+                </button>
+
+
+            </div>
+
+
         </form>
-      </section>
 
-      <section class="card table-card">
-        <div class="toolbar"><div class="card-head" style="margin:0"><div class="icon">📋</div><div><h2>Horarios registrados</h2><div class="sub">Disponibilidad activa de los especialistas.</div></div></div><input class="search" id="buscar" type="search" placeholder="🔎 Buscar neurólogo o día..." oninput="filtrar()"></div>
-        <br>
-        <div class="table-wrap"><table class="table" id="tablaHorarios"><thead><tr><th>Neurólogo</th><th>Día</th><th>Hora inicio</th><th>Hora fin</th><th>Estado</th><th>Acciones</th></tr></thead><tbody>
-        <% if(horarios != null && !horarios.isEmpty()) { for(Horario h: horarios){ String nombre = h.getIdDoctor(); String esp="Neurología"; for(Usuario d: doctores){ if(d.getIdentificacion()!=null && d.getIdentificacion().equals(h.getIdDoctor())){ nombre=d.getNombre()+" "+d.getApellido(); if(d.getEspecialidad()!=null && !d.getEspecialidad().trim().isEmpty()) esp=d.getEspecialidad(); break; }} %>
-          <tr><td><span class="doctor"><%=nombre%></span><span class="muted"><%=esp%> · ID <%=h.getIdDoctor()%></span></td><td><%=h.getDiaSemana()%></td><td>🕘 <%=h.getHoraInicio()%></td><td>🕐 <%=h.getHoraFin()%></td><td><span class="badge"><span class="dot"></span>Activo</span></td><td><form action="CtrolHorario" method="post" onsubmit="return confirm('¿Eliminar este horario?');"><input type="hidden" name="accion" value="eliminar"><input type="hidden" name="idHorario" value="<%=h.getIdHorario()%>"><input type="hidden" name="idDoctor" value="<%=h.getIdDoctor()%>"><button class="btn danger" type="submit">🗑 Eliminar</button></form></td></tr>
-        <% }} else { %><tr><td class="empty" colspan="6">No hay horarios registrados todavía.</td></tr><% } %>
-        </tbody></table></div>
-      </section>
-    </main>
-    <aside class="stats">
-      <div class="stat neuro-art"><p>“La neurología conecta ciencia con vida.”</p><div class="bigbrain">🧠</div></div>
-      <div class="stat"><div class="num"><%=doctores.size()%></div><small>Neurólogos activos</small></div>
-      <div class="stat"><div class="num"><%=horarios.size()%></div><small>Horarios registrados</small></div>
-    </aside>
-  </div>
+
+    </section>
+
+
+    <!-- ============================== -->
+    <!-- CALENDARIO -->
+    <!-- ============================== -->
+
+    <section class="card">
+
+
+        <div class="card-title">
+
+
+            <div class="title-left">
+
+                <div class="icon">
+                    🗓️
+                </div>
+
+                <div>
+
+                    <h2>
+                        Calendario semanal
+                    </h2>
+
+                    <div class="sub">
+                        Horarios activos de todos los neurólogos.
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="calendar-tools">
+
+                <select
+                    id="filtroDoctor"
+                    class="filter-select"
+                    onchange="filtrarDoctor()"
+                >
+
+                    <option value="">
+                        Todos los neurólogos
+                    </option>
+
+
+                    <% for (Usuario d : doctores) { %>
+
+                        <option value="<%= d.getIdentificacion() %>">
+
+                            <%= d.getNombre() %>
+                            <%= d.getApellido() %>
+
+                        </option>
+
+                    <% } %>
+
+                </select>
+
+            </div>
+
+
+        </div>
+
+
+        <div class="calendar-scroll">
+
+
+            <table class="calendar">
+
+
+                <thead>
+
+                    <tr>
+
+                        <th>
+                            HORA
+                        </th>
+
+
+                        <% for (String dia : dias) { %>
+
+                            <th>
+
+                                <span class="day-title">
+                                    <%= dia.toUpperCase() %>
+                                </span>
+
+                                <span class="day-small">
+                                    Disponibilidad
+                                </span>
+
+                            </th>
+
+                        <% } %>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody>
+
+
+                <%
+                    for (int hora = 6; hora <= 21; hora++) {
+                %>
+
+
+                    <tr>
+
+
+                        <td class="hour">
+
+                            <%= String.format("%02d:00", hora) %>
+
+                        </td>
+
+
+                        <%
+                            for (String dia : dias) {
+                        %>
+
+
+                        <td>
+
+
+                            <%
+                                if (horarios != null) {
+
+                                    for (Horario h : horarios) {
+
+                                        if (h.getDiaSemana() == null ||
+                                            !h.getDiaSemana().equalsIgnoreCase(dia)) {
+
+                                            continue;
+                                        }
+
+
+                                        String inicioTexto =
+                                                String.valueOf(h.getHoraInicio());
+
+                                        String finTexto =
+                                                String.valueOf(h.getHoraFin());
+
+
+                                        int horaInicio = -1;
+
+
+                                        try {
+
+                                            String[] partes =
+                                                    inicioTexto.split(":");
+
+                                            horaInicio =
+                                                    Integer.parseInt(partes[0]);
+
+                                        } catch (Exception e) {
+
+                                            horaInicio = -1;
+                                        }
+
+
+                                        if (horaInicio != hora) {
+
+                                            continue;
+                                        }
+
+
+                                        String nombreDoctor =
+                                                h.getIdDoctor();
+
+                                        String especialidad =
+                                                "Neurología";
+
+
+                                        for (Usuario d : doctores) {
+
+                                            if (d.getIdentificacion() != null &&
+                                                d.getIdentificacion().equals(
+                                                        h.getIdDoctor()
+                                                )) {
+
+                                                nombreDoctor =
+                                                        d.getNombre()
+                                                        + " "
+                                                        + d.getApellido();
+
+
+                                                if (d.getEspecialidad() != null &&
+                                                    !d.getEspecialidad()
+                                                      .trim()
+                                                      .isEmpty()) {
+
+                                                    especialidad =
+                                                            d.getEspecialidad();
+                                                }
+
+                                                break;
+                                            }
+                                        }
+                            %>
+
+
+                            <div
+                                class="schedule horario-item"
+
+                                data-doctor="<%= h.getIdDoctor() %>"
+
+                                data-idhorario="<%= h.getIdHorario() %>"
+
+                                data-nombre="<%= nombreDoctor %>"
+
+                                data-especialidad="<%= especialidad %>"
+
+                                data-dia="<%= dia %>"
+
+                                data-inicio="<%= inicioTexto %>"
+
+                                data-fin="<%= finTexto %>"
+
+                                onclick="abrirHorario(this)"
+                            >
+
+
+                                <div class="schedule-name">
+
+                                    Dr(a).
+                                    <%= nombreDoctor %>
+
+                                </div>
+
+
+                                <div class="schedule-specialty">
+
+                                    🧠
+                                    <%= especialidad %>
+
+                                </div>
+
+
+                                <div class="schedule-time">
+
+                                    🕘
+                                    <%= inicioTexto %>
+                                    -
+                                    <%= finTexto %>
+
+                                </div>
+
+
+                            </div>
+
+
+                            <%
+                                    }
+                                }
+                            %>
+
+
+                        </td>
+
+
+                        <%
+                            }
+                        %>
+
+
+                    </tr>
+
+
+                <%
+                    }
+                %>
+
+
+                </tbody>
+
+
+            </table>
+
+
+        </div>
+
+
+        <div class="legend">
+
+            <span class="legend-dot"></span>
+
+            Haz clic sobre un horario para ver sus detalles.
+
+        </div>
+
+
+    </section>
+
+
 </div>
+
+
+<!-- ============================== -->
+<!-- MODAL -->
+<!-- ============================== -->
+
+<div
+    class="modal"
+    id="modalHorario"
+    onclick="cerrarFondo(event)"
+>
+
+
+    <div class="modal-box">
+
+
+        <div class="modal-head">
+
+
+            <button
+                type="button"
+                class="close"
+                onclick="cerrarModal()"
+            >
+                ×
+            </button>
+
+
+            <h2 id="modalDoctor">
+                Neurólogo
+            </h2>
+
+
+            <p id="modalEspecialidad">
+                Neurología
+            </p>
+
+
+        </div>
+
+
+        <div class="modal-body">
+
+
+            <div class="info-row">
+
+                <span>
+                    🪪 Identificación
+                </span>
+
+                <strong id="modalIdDoctor"></strong>
+
+            </div>
+
+
+            <div class="info-row">
+
+                <span>
+                    📅 Día
+                </span>
+
+                <strong id="modalDia"></strong>
+
+            </div>
+
+
+            <div class="info-row">
+
+                <span>
+                    🕘 Hora inicio
+                </span>
+
+                <strong id="modalInicio"></strong>
+
+            </div>
+
+
+            <div class="info-row">
+
+                <span>
+                    🕐 Hora fin
+                </span>
+
+                <strong id="modalFin"></strong>
+
+            </div>
+
+
+            <form
+                action="CtrolHorario"
+                method="post"
+                class="delete-form"
+                onsubmit="return confirm('¿Seguro que deseas eliminar este horario?');"
+            >
+
+
+                <input
+                    type="hidden"
+                    name="accion"
+                    value="eliminar"
+                >
+
+
+                <input
+                    type="hidden"
+                    name="idHorario"
+                    id="modalIdHorario"
+                >
+
+
+                <input
+                    type="hidden"
+                    name="idDoctor"
+                    id="modalDoctorEliminar"
+                >
+
+
+                <button
+                    type="submit"
+                    class="btn delete"
+                >
+
+                    🗑 Eliminar horario
+
+                </button>
+
+
+            </form>
+
+
+        </div>
+
+
+    </div>
+
+
+</div>
+
+
 <script>
-function filtrar(){var q=document.getElementById('buscar').value.toLowerCase();document.querySelectorAll('#tablaHorarios tbody tr').forEach(function(f){f.style.display=f.innerText.toLowerCase().includes(q)?'':'none';});}
+
+/* ============================= */
+/* ABRIR HORARIO */
+/* ============================= */
+
+function abrirHorario(elemento) {
+
+    var idHorario =
+        elemento.getAttribute("data-idhorario");
+
+    var idDoctor =
+        elemento.getAttribute("data-doctor");
+
+    var nombre =
+        elemento.getAttribute("data-nombre");
+
+    var especialidad =
+        elemento.getAttribute("data-especialidad");
+
+    var dia =
+        elemento.getAttribute("data-dia");
+
+    var inicio =
+        elemento.getAttribute("data-inicio");
+
+    var fin =
+        elemento.getAttribute("data-fin");
+
+
+    document.getElementById(
+        "modalDoctor"
+    ).textContent =
+        "Dr(a). " + nombre;
+
+
+    document.getElementById(
+        "modalEspecialidad"
+    ).textContent =
+        especialidad;
+
+
+    document.getElementById(
+        "modalIdDoctor"
+    ).textContent =
+        idDoctor;
+
+
+    document.getElementById(
+        "modalDia"
+    ).textContent =
+        dia;
+
+
+    document.getElementById(
+        "modalInicio"
+    ).textContent =
+        inicio;
+
+
+    document.getElementById(
+        "modalFin"
+    ).textContent =
+        fin;
+
+
+    document.getElementById(
+        "modalIdHorario"
+    ).value =
+        idHorario;
+
+
+    document.getElementById(
+        "modalDoctorEliminar"
+    ).value =
+        idDoctor;
+
+
+    document.getElementById(
+        "modalHorario"
+    ).classList.add("show");
+}
+
+
+/* ============================= */
+/* CERRAR MODAL */
+/* ============================= */
+
+function cerrarModal() {
+
+    document.getElementById(
+        "modalHorario"
+    ).classList.remove("show");
+}
+
+
+function cerrarFondo(event) {
+
+    if (event.target.id === "modalHorario") {
+
+        cerrarModal();
+    }
+}
+
+
+/* ============================= */
+/* FILTRAR NEURÓLOGO */
+/* ============================= */
+
+function filtrarDoctor() {
+
+    var doctor =
+        document.getElementById(
+            "filtroDoctor"
+        ).value;
+
+
+    var horarios =
+        document.querySelectorAll(
+            ".horario-item"
+        );
+
+
+    horarios.forEach(function(item) {
+
+        if (
+            doctor === "" ||
+            item.getAttribute("data-doctor") === doctor
+        ) {
+
+            item.style.display = "";
+
+        } else {
+
+            item.style.display = "none";
+        }
+
+    });
+}
+
+
+/* ============================= */
+/* CERRAR CON ESC */
+/* ============================= */
+
+document.addEventListener(
+    "keydown",
+    function(event) {
+
+        if (event.key === "Escape") {
+
+            cerrarModal();
+        }
+
+    }
+);
+
 </script>
-</body></html>
+
+
+</body>
+
+</html>
