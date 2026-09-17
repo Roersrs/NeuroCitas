@@ -1,0 +1,1 @@
+<%@page contentType="text/html" pageEncoding="UTF-8"%><!DOCTYPE html><html><head><link rel="stylesheet" href="css/estilos.css"></head><body><div class="page"><div class="msg ok">Proceso realizado correctamente.</div><a class="btn" href="front.jsp">Volver</a></div></body></html>
