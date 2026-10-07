@@ -102,7 +102,7 @@
                 <h1>Hola, <%= u.getNombre() %></h1>
                 <p>Agenda tus citas con neurologos especializados y consulta tu historial clinico de manera segura desde este portal.</p>
             </div>
-            <a class="btn" href="agendarCita.jsp">Agendar cita</a>
+            <a class="btn" href="solicitarCita.jsp">Agendar cita</a>
         </div>
         <div class="grid dashboard-grid">
             <div class="info-card">
@@ -121,7 +121,7 @@
                 <div class="icon-circle">&#43;</div>
                 <h3>Nueva cita</h3>
                 <p>Elige un neurologo, selecciona el servicio especializado y escoge fecha y hora disponible.</p>
-                <a href="agendarCita.jsp">Agendar cita</a>
+                <a href="solicitarCita.jsp">Agendar cita</a>
             </div>
         </div>
 
